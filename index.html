@@ -52,7 +52,7 @@
             }
 
             // 1. 用 Meting API 搜索歌曲
-            const searchUrl = `https://api.wuenci.com/meting/api?server=netease&type=search&title=${songName}&format=json`;
+          const searchUrl = `https://meting-2ko3whs3j-zzxbnms-projects.vercel.app/api?server=netease&type=search&title=${songName}&format=json`;
             try {
                 const res = await fetch(searchUrl);
                 const data = await res.json();
