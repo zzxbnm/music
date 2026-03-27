@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>相似风格歌曲推荐</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-8">
+    <div class="max-w-3xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">🎧 相似风格歌曲推荐</h1>
+        
+        <!-- 输入歌名搜索 -->
+        <div class="flex gap-2 mb-8">
+            <input 
+                type="text" 
+                id="songName" 
+                placeholder="输入歌曲名（如：起风了）"
+                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+            <button 
+                onclick="searchAndRecommend()"
+                class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+            >
+                获取推荐
+            </button>
+        </div>
+
+        <!-- 搜索结果选择 -->
+        <div id="searchResult" class="bg-white rounded-lg shadow p-6 mb-6 hidden">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">请选择目标歌曲</h2>
+            <ul id="searchList" class="space-y-3"></ul>
+        </div>
+
+        <!-- 推荐结果 -->
+        <div id="recommendResult" class="bg-white rounded-lg shadow p-6 hidden">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">🎶 相似风格推荐歌曲</h2>
+            <ul id="recommendList" class="space-y-3"></ul>
+        </div>
+    </div>
+
+    <script>
+        // 搜索歌曲并获取推荐
+        async function searchAndRecommend() {
+            const songName = document.getElementById("songName").value.trim();
+            const searchResult = document.getElementById("searchResult");
+            const searchList = document.getElementById("searchList");
+            const recommendResult = document.getElementById("recommendResult");
+
+            if (!songName) {
+                alert("请输入歌曲名！");
+                return;
+            }
+
+            // 1. 用 Meting API 搜索歌曲
+            const searchUrl = `https://api.injahow.cn/meting/?server=netease&type=search&title=${songName}&format=json`;
+            
+            try {
+                const res = await fetch(searchUrl);
+                const data = await res.json();
+
+                if (data.length === 0) {
+                    alert("未找到该歌曲，请换个歌名试试");
+                    return;
+                }
+
+                // 2. 展示搜索结果供选择
+                searchList.innerHTML = "";
+                data.forEach(song => {
+                    const li = document.createElement("li");
+                    li.className = "p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition cursor-pointer";
+                    li.innerHTML = `
+                        <div class="font-medium text-gray-800">${song.name}</div>
+                        <div class="text-sm text-gray-500">${song.artist} | 专辑：${song.album}</div>
+                    `;
+                    li.onclick = () => getRecommendations(song);
+                    searchList.appendChild(li);
+                });
+
+                searchResult.classList.remove("hidden");
+                recommendResult.classList.add("hidden");
+            } catch (err) {
+                console.error("搜索失败：", err);
+                alert("搜索失败，请稍后重试");
+            }
+        }
+
+        // 根据选中歌曲生成推荐
+        async function getRecommendations(originalSong) {
+            const recommendResult = document.getElementById("recommendResult");
+            const recommendList = document.getElementById("recommendList");
+
+            // 3. 模拟推荐逻辑（实际可替换为相似歌曲API）
+            recommendList.innerHTML = "";
+            
+            // 模拟同风格/同歌手推荐
+            const mockRecommendations = [
+                { name: `${originalSong.name} 风格相似曲1`, artist: originalSong.artist, genre: "流行" },
+                { name: `${originalSong.name} 风格相似曲2`, artist: "其他同风格歌手", genre: "流行" },
+                { name: `${originalSong.name} 风格相似曲3`, artist: originalSong.artist, genre: "流行" }
+            ];
+
+            mockRecommendations.forEach(song => {
+                const li = document.createElement("li");
+                li.className = "p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition";
+                li.innerHTML = `
+                    <div class="font-medium text-gray-800">${song.name}</div>
+                    <div class="text-sm text-gray-500">${song.artist} | 流派：${song.genre}</div>
+                `;
+                recommendList.appendChild(li);
+            });
+
+            recommendResult.classList.remove("hidden");
+        }
+    </script>
+</body>
+</html>
